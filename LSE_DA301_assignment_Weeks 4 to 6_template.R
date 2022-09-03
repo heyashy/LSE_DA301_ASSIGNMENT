@@ -62,39 +62,132 @@
 # 1. Load and explore the data
 
 # Install and import Tidyverse.
-
+install.packages("tidyverse")
+library(tidyverse)
 
 # Import the data set.
+getwd()
 
+data <- read.csv(file.choose(), header = T)
+#data <- read.csv('turtle_sales.csv', header = T)
 
 # Print the data frame.
-
-
+data
+View(data)
+str(data)
+typeof(data)
+class(data)
+dim(data)
 # Create a new data frame from a subset of the sales data frame.
-# Remove unnecessary columns. 
-
+# Remove unnecessary columns.
+full_data <- data
+drop <- c("Ranking", "Year", "Genre", "Publisher")
+trimmed_data <- data[,!(names(data) %in% drop)]
 
 # View the data frame.
-
+View(data)
 
 # View the descriptive statistics.
+summary(data)
 
+
+count(data %>%
+    group_by(Platform))
+
+count(data %>%
+    group_by(Genre))
 
 ################################################################################
 
 # 2. Review plots to determine insights into the data set.
 
+# Create a new column of pc vs console
+data <- data %>% mutate(pc_vs_console = ifelse(Platform == "PC", "PC", "Console"))
+view(data)
 ## 2a) Scatterplots
 # Create scatterplots.
+install.packages("ggplot2")
+install.packages("gridExtra")
+library(ggplot2)
+library(gridExtra)
+options(repr.plot.width = 15, repr.plot.height = 8)
 
+p <- ggplot(data, aes(y = Genre, x = Global_Sales)) 
+g1  <- p + geom_jitter() + labs(title = "Global Sales by Product", x = "Global Sales", y = "Product")
+
+p <- ggplot(data, aes(y = pc_vs_console, x = Global_Sales))
+g2 <- p + geom_jitter(width = 1, height = 0.2) + labs(title = "Global Sales by Platform", x = "Global Sales", y = "Platform")
+
+g1grob <- ggplotGrob(g1)
+g2grob <- ggplotGrob(g2)
+
+output <- grid.arrange(g1grob, g2grob, ncol = 2, nrow = 1)
 
 ## 2b) Histograms
 # Create histograms.
+# Change histogram plot line colors by groups
+# By pc_vs_console
+g1 <- ggplot(data, aes(x = EU_Sales, color = pc_vs_console)) +
+        geom_histogram(fill = "white", alpha = 0.5, position = "identity") +
+        labs(title = "EU Sales by Platform", x = "EU Sales", y = "Frequency")
+g2 <- ggplot(data, aes(x = Global_Sales, color = pc_vs_console)) +
+    geom_histogram(fill = "white", alpha = 0.5, position = "identity") +
+    labs(title = "Global Sales by Platform", x = "EU Sales", y = "Frequency")
+
+g1grob <- ggplotGrob(g1)
+g2grob <- ggplotGrob(g2)
+
+output <- grid.arrange(g1grob, g2grob, ncol = 1, nrow = 2)
+
+# load the library
+library(forcats)
+
+# Reorder following the value of another column:
+g1 <- data %>%
+        mutate(name = fct_reorder(Genre, Global_Sales)) %>%
+        ggplot(aes(x = Genre, y = Global_Sales)) +
+        geom_bar(stat = "identity", fill = "#f68060", alpha = .6, width = .4) +
+        coord_flip() +
+        xlab("") +
+        theme_bw()
+
+g2 <-  data %>%
+        mutate(name = fct_reorder(Genre, EU_Sales)) %>%
+        ggplot(aes(x = Genre, y = EU_Sales)) +
+        geom_bar(stat = "identity", fill = "#f68060", alpha = .6, width = .4) +
+        coord_flip() +
+        xlab("") +
+        theme_bw()
+
+g1grob <- ggplotGrob(g1)
+g2grob <- ggplotGrob(g2)
+
+output <- grid.arrange(g1grob, g2grob, ncol = 1, nrow = 2)
+
 
 
 ## 2c) Boxplots
 # Create boxplots.
+g1 <- data %>%
+            mutate(class = fct_reorder(Genre, Global_Sales, .fun = "median")) %>%
+            ggplot(aes(y = reorder(Genre, Global_Sales), x = Global_Sales, fill = class)) +
+            geom_boxplot() +
+            ylab("class") +
+            theme(legend.position = "none") +
+            ylab("")
 
+g2 <- data %>%
+            mutate(class = fct_reorder(Genre, EU_Sales, .fun = "median")) %>%
+            ggplot(aes(y = reorder(Genre, EU_Sales), x = EU_Sales, fill = class)) +
+            geom_boxplot() +
+            ylab("class") +
+            theme(legend.position = "none") +
+            ylab("")
+
+g1grob <- ggplotGrob(g1)
+g2grob <- ggplotGrob(g2)
+
+output <- grid.arrange(g1grob, g2grob, ncol = 1, nrow = 2)
 
 ###############################################################################
 
@@ -102,33 +195,56 @@
 
 ## 3a) Use the group_by and aggregate functions.
 # Group data based on Product and determine the sum per Product.
+global_sales_by_product <- data %>%
+                                group_by(Product, Genre) %>%
+                                summarise(total_sales  = sum(Global_Sales))
 
 
 # View the data frame.
-
-
-# Explore the data frame.
+global_sales_by_product
+View(global_sales_by_product)
+str(global_sales_by_product)
+typeof(global_sales_by_product)
+class(global_sales_by_product)
+dim(global_sales_by_product)
+colnames(global_sales_by_product)
 
 
 
 ## 3b) Determine which plot is the best to compare game sales.
 # Create scatterplots.
+p <- ggplot(global_sales_by_product, aes(y = Genre, x = total_sales, colour = Product))
+p + geom_jitter() + labs(title = "Global Sales by Product", x = "Global Sales", y = "Product")
+
+p <- ggplot(global_sales_by_product, aes(y = Product, x = total_sales, colour = Genre))
+p + geom_jitter() + labs(title = "Global Sales by Product", x = "Global Sales", y = "Product")
 
 
 # Create histograms.
-
+ggplot(global_sales_by_product, aes(x = total_sales)) +
+    geom_histogram(fill = "red", alpha = 1, position = "identity") +
+    labs(title = "Total Sales by Platform", x = "Total Sales", y = "Frequency")
 
 # Create boxplots.
-
+global_sales_by_product %>%
+    mutate(class = fct_reorder(Genre, total_sales, .fun = "median")) %>%
+    ggplot(aes(y = reorder(Genre, total_sales), x = total_sales, fill = class)) +
+    geom_boxplot() +
+    ylab("class") +
+    theme(legend.position = "none") +
+    ylab("")
 
 ###############################################################################
 
 # 4. Observations and insights
 
 ## Your observations and insights here ......
-
-
-
+# Our sales data contains 352 games, 10 platforms and 12 genres. The release date from games
+# ranges from 1980 to 2016. Global mean sales are 5.335 million, while the EU mean sales are 1.644 million.
+# Globally Sports, shooter and action games are the most popular.In Europe Shooters are the most popular,
+# followed by Platform and Action.The least popular games are Strategy and Adventure.
+# There are some outliers in sports sales with very high sales numbers that have very high sales numebrs
+# The median Racing game sells better than any other game genre.
 
 ###############################################################################
 ###############################################################################
@@ -291,7 +407,6 @@
 
 ###############################################################################
 ###############################################################################
-
 
 
 
