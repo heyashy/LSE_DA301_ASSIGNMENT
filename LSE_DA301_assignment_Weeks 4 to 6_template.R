@@ -276,16 +276,43 @@ global_sales_by_product %>%
 
 ################################################################################
 
+install.packages("skimr")
+install.packages("DataExplorer")
+
+# The whole tidyverse library.
+library(tidyverse)
+# Import and read CSV file.
+library(readr)
+# Data wrangling.
+library(dplyr)
+# Data wrangling.
+library(tidyr)
+# Create statistical summaries.
+library(skimr)
+# Create a report as an HTML file.
+library(DataExplorer)
+
 # 1. Load and explore the data
-
+data <- read.csv(file.choose(), header = T)
 # View data frame created in Week 4.
-
-
+view(data)
+as_tibble(data)
 # Check output: Determine the min, max, and mean values.
-
+data %>%
+    select(NA_Sales, EU_Sales, Global_Sales) %>%
+    summarise(min = min(NA_Sales), max = max(NA_Sales), median = median(NA_Sales))
+data %>%
+    select(NA_Sales, EU_Sales, Global_Sales) %>%
+    summarise(min = min(EU_Sales), max = max(EU_Sales), median = median(EU_Sales))
+data %>%
+    select(NA_Sales, EU_Sales, Global_Sales) %>%
+    summarise(min = min(Global_Sales), max = max(Global_Sales), median = median(Global_Sales))
 
 # View the descriptive statistics.
-
+# Method 1
+view(summary(data))
+# Method 2
+summary(data)
 
 ###############################################################################
 
@@ -293,36 +320,125 @@ global_sales_by_product %>%
 
 ## 2a) Create Q-Q Plots
 # Create Q-Q Plots.
+par(mfrow = c(1, 1))
+qqnorm(data$NA_Sales)
+qqline(data$NA_Sales)
 
+qqnorm(data$EU_Sales)
+qqline(data$EU_Sales)
 
+qqnorm(data$Global_Sales)
+qqline(data$Global_Sales)
 
+par(mfrow = c(3, 1)) ## one row, two columns
+qqplot(qnorm(ppoints(50)), data$NA_Sales, main = "NA_Sales Q-Q Plot")
+qqline(data$NA_Sales)
+qqplot(qnorm(ppoints(50)), data$EU_Sales, main= "EU_Sales Q-Q Plot")
+qqline(data$EU_Sales)
+qqplot(qnorm(ppoints(50)), data$Global_Sales, main = "EU_Sales Q-Q Plot")
+qqline(data$Global_Sales)
 ## 2b) Perform Shapiro-Wilk test
 # Install and import Moments.
-
+install.packages("moments")
+library(moments)
 
 # Perform Shapiro-Wilk test.
+shapiro.test(data$NA_Sales)
+# The Data is not normally distributed with a p value of 2.2e-16
 
+shapiro.test(data$EU_Sales)
+# The Data is not normally distributed with a p value of 2.2e-16
 
+shapiro.test(data$Global_Sales)
+# The Data is not normally distributed with a p value of 2.2e-16
 
 ## 2c) Determine Skewness and Kurtosis
 # Skewness and Kurtosis.
+skewness(data$NA_Sales)
+kurtosis(data$NA_Sales)
+# Leptokurtic distribution with a positive skewness.
 
+skewness(data$EU_Sales)
+kurtosis(data$EU_Sales)
+# Leptokurtic distribution with a positive skewness.
+
+skewness(data$Global_Sales)
+kurtosis(data$Global_Sales)
+# Leptokurtic distribution with a positive skewness.
 
 
 ## 2d) Determine correlation
 # Determine correlation.
-
+round(cor(data$NA_Sales, data$Global_Sales), digits=2)
+# High positive correcation between NA_Sales and Global_Sales of 0.93
+round(cor(data$EU_Sales, data$Global_Sales), digits=2)
+# High positive correcation between EU_Sales and Global_Sales of 0.88
+round(cor(data$NA_Sales, data$EU_Sales), digits=2)
+# High positive correcation between NA_Sales and EU_Sales of 0.71
 
 ###############################################################################
 
 # 3. Plot the data
 # Create plots to gain insights into data.
 
+ggplot(
+    data = data,
+    mapping = aes(x = Global_Sales, y = Publisher, color = Genre)
+) +
+    geom_point(position = "jitter", alpha = 0.5, size = 1.5) +
+    labs(title = "Global Sales by Publisher", x = "Global Sales", y = "Publisher")
+
+
+ggplot(
+    data = data,
+    mapping = aes(x = Global_Sales, y = EU_Sales)
+) +
+    geom_point(color = 'red', alpha = 0.5, size = 1.5) +
+    labs(title = "Global Sales by Publisher", x = "Global Sales", y = "EU Sales")
+
+
+data %>%
+    mutate(name = fct_reorder(Publisher, Global_Sales)) %>%
+    ggplot(aes(x = Publisher, y = Global_Sales)) +
+    geom_bar(stat = "identity", fill = "#f68060", alpha = .9, width = .4) +
+    coord_flip() +
+    xlab("") +
+    theme_bw()
+
+data %>%
+    mutate(name = fct_reorder(Genre, EU_Sales)) %>%
+    ggplot(aes(x = Genre, y = EU_Sales)) +
+    geom_bar(stat = "identity", fill = "#f68060", alpha = .9, width = .4) +
+    coord_flip() +
+    xlab("") +
+    theme_bw()
+
+data %>%
+    mutate(name = fct_reorder(Platform, Global_Sales)) %>%
+    ggplot(aes(x = Platform, y = Global_Sales)) +
+    geom_bar(stat = "identity", fill = "#f68060", alpha = .9, width = .4) +
+    coord_flip() +
+    xlab("") +
+    theme_bw()
+
 
 ###############################################################################
 
 # 4. Observations and insights
 # Your observations and insights here...
+
+# We can see that the data in all our sales figures is not normally distributed. With 
+# our Shapiro-Wilk showing p values of 2.2e-16 on all our sales data. We can also see
+# that the data is leptokurtic with a very high positive skewness. This means shows that
+# our data is not normally distributed and is very skewed. There is a game from Nintendo
+# that has outsold all other games in our dataset. The sales of this game were 67.85 million
+# Nintendo aslo has the highest sales for any publisher in our list. Wii is the most popular
+# platform followed by Xbox 360. 
+#
+# When we look at the correlation between the sales data we can see that there is a positive
+# correlation between all the sales data. This means that as one sales figure increases the
+# other sales figures will also increase. The highest correclation is between NA_Sales and
+# Global_Sales with a correlation of 0.93. 
 
 
 ###############################################################################
@@ -407,6 +523,7 @@ global_sales_by_product %>%
 
 ###############################################################################
 ###############################################################################
+
 
 
 
