@@ -62,7 +62,16 @@
 # 1. Load and explore the data
 
 # Install and import Tidyverse.
+# Install all packages required for this project so that R doesn't need to 
+# restart the kernel
 install.packages("tidyverse")
+install.packages("ggplot2")
+install.packages("gridExtra")
+install.packages("skimr")
+install.packages("DataExplorer")
+
+library(ggplot2)
+library(gridExtra)
 library(tidyverse)
 
 # Import the data set.
@@ -106,17 +115,17 @@ data <- data %>% mutate(pc_vs_console = ifelse(Platform == "PC", "PC", "Console"
 view(data)
 ## 2a) Scatterplots
 # Create scatterplots.
-install.packages("ggplot2")
-install.packages("gridExtra")
-library(ggplot2)
-library(gridExtra)
 options(repr.plot.width = 15, repr.plot.height = 8)
 
 p <- ggplot(data, aes(y = Genre, x = Global_Sales)) 
-g1  <- p + geom_jitter() + labs(title = "Global Sales by Product", x = "Global Sales", y = "Product")
+g1  <- p  + geom_jitter() 
+          + labs(title = "Global Sales by Product", 
+                 x = "Global Sales", y = "Product")
 
 p <- ggplot(data, aes(y = pc_vs_console, x = Global_Sales))
-g2 <- p + geom_jitter(width = 1, height = 0.2) + labs(title = "Global Sales by Platform", x = "Global Sales", y = "Platform")
+g2 <- p + geom_jitter(width = 1, height = 0.2) 
+        + labs(title = "Global Sales by Platform", 
+               x = "Global Sales", y = "Platform")
 
 g1grob <- ggplotGrob(g1)
 g2grob <- ggplotGrob(g2)
@@ -169,20 +178,20 @@ output <- grid.arrange(g1grob, g2grob, ncol = 1, nrow = 2)
 ## 2c) Boxplots
 # Create boxplots.
 g1 <- data %>%
-            mutate(class = fct_reorder(Genre, Global_Sales, .fun = "median")) %>%
-            ggplot(aes(y = reorder(Genre, Global_Sales), x = Global_Sales, fill = class)) +
-            geom_boxplot() +
-            ylab("class") +
-            theme(legend.position = "none") +
-            ylab("")
+        mutate(class = fct_reorder(Genre, Global_Sales, .fun = "median")) %>%
+        ggplot(aes(y = reorder(Genre, Global_Sales), x = Global_Sales, fill = class)) +
+        geom_boxplot() +
+        ylab("class") +
+        theme(legend.position = "none") +
+        ylab("")
 
 g2 <- data %>%
-            mutate(class = fct_reorder(Genre, EU_Sales, .fun = "median")) %>%
-            ggplot(aes(y = reorder(Genre, EU_Sales), x = EU_Sales, fill = class)) +
-            geom_boxplot() +
-            ylab("class") +
-            theme(legend.position = "none") +
-            ylab("")
+        mutate(class = fct_reorder(Genre, EU_Sales, .fun = "median")) %>%
+        ggplot(aes(y = reorder(Genre, EU_Sales), x = EU_Sales, fill = class)) +
+        geom_boxplot() +
+        ylab("class") +
+        theme(legend.position = "none") +
+        ylab("")
 
 g1grob <- ggplotGrob(g1)
 g2grob <- ggplotGrob(g2)
@@ -213,11 +222,15 @@ colnames(global_sales_by_product)
 
 ## 3b) Determine which plot is the best to compare game sales.
 # Create scatterplots.
-p <- ggplot(global_sales_by_product, aes(y = Genre, x = total_sales, colour = Product))
-p + geom_jitter() + labs(title = "Global Sales by Product", x = "Global Sales", y = "Product")
+p <- ggplot(global_sales_by_product, aes(y = Genre, x = total_sales, 
+                                         colour = Product))
+p + geom_jitter() + labs(title = "Global Sales by Product", 
+                         x = "Global Sales", y = "Product")
 
-p <- ggplot(global_sales_by_product, aes(y = Product, x = total_sales, colour = Genre))
-p + geom_jitter() + labs(title = "Global Sales by Product", x = "Global Sales", y = "Product")
+p <- ggplot(global_sales_by_product, aes(y = Product, 
+                                         x = total_sales, colour = Genre))
+p + geom_jitter() + labs(title = "Global Sales by Product", 
+                         x = "Global Sales", y = "Product")
 
 
 # Create histograms.
@@ -238,7 +251,6 @@ global_sales_by_product %>%
 
 # 4. Observations and insights
 
-## Your observations and insights here ......
 # Our sales data contains 352 games, 10 platforms and 12 genres. The release date from games
 # ranges from 1980 to 2016. Global mean sales are 5.335 million, while the EU mean sales are 1.644 million.
 # Globally Sports, shooter and action games are the most popular.In Europe Shooters are the most popular,
@@ -276,8 +288,7 @@ global_sales_by_product %>%
 
 ################################################################################
 
-install.packages("skimr")
-install.packages("DataExplorer")
+
 
 # The whole tidyverse library.
 library(tidyverse)
@@ -300,13 +311,16 @@ as_tibble(data)
 # Check output: Determine the min, max, and mean values.
 data %>%
     select(NA_Sales, EU_Sales, Global_Sales) %>%
-    summarise(min = min(NA_Sales), max = max(NA_Sales), median = median(NA_Sales))
+    summarise(min = min(NA_Sales), max = max(NA_Sales), 
+              median = median(NA_Sales))
 data %>%
     select(NA_Sales, EU_Sales, Global_Sales) %>%
-    summarise(min = min(EU_Sales), max = max(EU_Sales), median = median(EU_Sales))
+    summarise(min = min(EU_Sales), max = max(EU_Sales), 
+              median = median(EU_Sales))
 data %>%
     select(NA_Sales, EU_Sales, Global_Sales) %>%
-    summarise(min = min(Global_Sales), max = max(Global_Sales), median = median(Global_Sales))
+    summarise(min = min(Global_Sales), max = max(Global_Sales), 
+              median = median(Global_Sales))
 
 # View the descriptive statistics.
 # Method 1
@@ -479,24 +493,61 @@ data %>%
 # 5. Include your insights and observations.
 
 ###############################################################################
+library(tidyverse)
 
 # 1. Load and explor the data
 # View data frame created in Week 5.
+data <- read.csv(file.choose(), header = T)
 
 
 # Determine a summary of the data frame.
+summary(data)
 
+plot(data$NA_Sales, data$EU_Sales)
+plot(data$NA_Sales, data$Global_Sales)
+plot(data$EU_Sales, data$Global_Sales)
 
 ###############################################################################
 
 # 2. Create a simple linear regression model
 ## 2a) Determine the correlation between columns
 # Create a linear regression model on the original data.
+attach(data)
 
+# Pearson's correlation:
+cor(EU_Sales, Global_Sales)
+# High correlation between EU_Sales and Global_Sales of 87.75%
+cor(EU_Sales, NA_Sales)
+# Medium correlation between EU_Sales and Global_Sales of 70.55%
+cor(Global_Sales, NA_Sales)
+# Very High correlation between EU_Sales and Global_Sales of 93.49%
+mod <- lm(NA_Sales ~ Global_Sales)
 
+mod
+summary(mod)
+attributes(mod)
 
+mod$coef
 ## 2b) Create a plot (simple linear regression)
 # Basic visualisation.
+plot(NA_Sales, Global_Sales, main="Regression for NA_Sales and Global_Sales")
+
+abline(mod, col=2, lwd=3)
+
+confint(mod)
+
+# anova table
+anova(mod)
+SSE1 = sum(mod$residuals^2)
+SSE1
+
+
+# Regression Diagnositcs
+plot(mod)
+par(mfrow=c(2,2))
+plot(mod)
+mtext("Regression Diagnostics NA_Sales vs Global_Sales", side = 3, 
+      line = -2, outer = TRUE)
 
 
 ###############################################################################
@@ -504,22 +555,106 @@ data %>%
 # 3. Create a multiple linear regression model
 # Select only numeric columns from the original data frame.
 
+# Assumptions - we are using individual line items rather than sum to have
+# more data points for our model. 
+
+View(data)
+num_data <- data %>%
+  select(c(2, 7, 8, 9))
+
+View(num_data)
+attach(num_data)
+cor(num_data)
+
+#               Product   NA_Sales   EU_Sales Global_Sales
+#Product       1.0000000 -0.4047865 -0.3894246   -0.4409046
+#NA_Sales     -0.4047865  1.0000000  0.7055236    0.9349455
+#EU_Sales     -0.3894246  0.7055236  1.0000000    0.8775575
+#Global_Sales -0.4409046  0.9349455  0.8775575    1.0000000
+# NA_Sales and Global_Sales is what we should look at.
 
 # Multiple linear regression model.
+mmod <- lm(Global_Sales ~ NA_Sales + EU_Sales)
+summary(mmod)
 
+mmod$coef
+
+par(mfrow=c(2,2))
+plot(mmod)
+mtext("Multiple Regression", side = 3, 
+      line = -2, outer = TRUE)
+
+
+# Remove product from our model as it has a negative correlation
+
+View(data)
+
+df <- data %>% 
+      group_by(Product) %>% 
+      summarise(NA_Sales_sum = sum(NA_Sales),
+                EU_Sales_sum = sum(EU_Sales),
+                Global_Sales_sum = sum(Global_Sales))
+sales_data <- df %>%
+  select(c(2, 3, 4))
+View(sales_data)
+
+
+attach(sales_data)
+model <- lm(Global_Sales ~ NA_Sales + EU_Sales)
+summary(model)
+
+model$coef
+
+par(mfrow=c(2,2))
+plot(model)
+mtext("Multiple Regression", side = 3, 
+      line = -2, outer = TRUE)
+
+
+# Model is not accurate after sales of 35 million and errors are accurate 
+# between -1 to 1 quantile
 
 ###############################################################################
+
 
 # 4. Predictions based on given values
 # Compare with observed values for a number of records.
 
+Product  <- c(107, 107,107,107,107)
+NA_Sales <- c(34.02, 3.93, 2.73, 2.26, 22.08)
+EU_Sales <- c(23.80, 1.56, 0.65, 0.97, .052)
+#Product <-  c(107)
+#NA_Sales <- c(34.02)
+#EU_Sales <- c(23.80)
+predict_data <- data.frame(Product, NA_Sales, EU_Sales)
+prediction <- predict(model, newdata = predict_data)
+View(prediction)
+prediction
 
-
+#         1         2         3         4         5 
+# 71.468572  6.856083  4.248367  4.134744 25.803524 
 ###############################################################################
 
 # 5. Observations and insights
 # Your observations and insights here...
 
+# Looking at our Pearson's correlation we can see that the highest correlation 
+# in our data is between North America Sales and Global Sales with a index of 
+# 93.49% followed by EU and Global Sales of 87.75% with the least being EU and 
+# North American Sales of 70.55%.
+
+# We started with a Linear Regression model of North American and Global Sales. 
+# Although there is a very high positive correlation we can see some errors in 
+# our regression diagnostics. Firstly our Residual vs Fitted  shows a megaphone 
+# shape which would indicate variances increase as the values go up. This would 
+# mean larger values are associated with large errors or residuals. In addition 
+# our Normal Q-Q plot shows minimal errors between the -1 and 1 quantiles. T
+# he errors increase considerably when we are not within this zone. 
+
+# Using multi linear regression we can see that product number has a negative 
+# correlation and our final model was made without product as a correlation 
+# vector. The regular vs fitted values changes dramatically for very high value 
+# showing that linearity is not met as we look at high sales figures.
 
 ###############################################################################
 ###############################################################################
